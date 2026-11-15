@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('cleanWs') {
+            steps {
+                cleanWs()
+            }
+        }
+        stage('Code') {
+            steps {
+                git "https://github.com/pavanreddy215/PHPProjectBloodBank.git"
+            }
+        }
+        stage('CQA') {
+            environment {
+                scannerHome = tool 'mysonar'
+            }
+            steps {
+                withSonarQubeEnv('MySonar') {
+                    sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=MyProject"
+                }
+            }
+        }
+        stage('QaulityGate') {
+            steps {
+                waitForQualityGate abortPipeline: true, credentialsId: 'soanrqube'
+            }
+        }
+        stage('Image') {
+            steps {
+                sh 'docker build -t pavanreddy215/k8sphp:app .'
+                sh 'docker build -t pavanreddy215/k8sphp:db database'
+            }
+        }
+        stage('ImageScan') {
+            steps {
+                sh 'trivy image pavanreddy215/k8sphp:app'
+                sh 'trivy image pavanreddy215/k8sphp:db'
+            }
+        }
+        stage('ImagePush') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'dockerhub') {
+                        sh 'docker push pavanreddy215/k8sphp:app'
+                        sh 'docker push pavanreddy215/k8sphp:db'
+                    }
+                }
+            }
+        }
+    }
+}
