@@ -1,0 +1,40 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: bankappdbstatefulset
+spec:
+  serviceName: "mysqldb"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myapp-db
+  template:
+    metadata:
+      labels:
+        app: myapp-db
+    spec:
+      containers:
+      - name: bankappdbcontainer
+        image: pavanreddy215/k8sphp:db
+        ports:
+        - containerPort: 3306
+
+      #Secret Integration
+        envFrom:
+        - secretRef:
+            name: bankappdbsecret
+
+      #resource quota integration
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+      
+      #Volume Mounts for Persistent Storage
+        volumeMounts:
+        - name: bankappdbpvc
+          mountPath: /var/lib/mysql
