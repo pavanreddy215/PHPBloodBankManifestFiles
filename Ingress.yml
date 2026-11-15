@@ -13,6 +13,6 @@ spec:
           pathType: Prefix
           backend:
             service:
-             name: BankAppService
+             name: bankappservice
              port: 
                number: 80
