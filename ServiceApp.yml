@@ -6,7 +6,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: myapp
+    app: bankapp
   ports:
   - port: 80
     targetPort: 80
