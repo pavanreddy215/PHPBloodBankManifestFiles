@@ -32,7 +32,7 @@ spec:
           protocol: TCP
   podSelector:
     matchLabels:
-      app: myapp
+      app: bankapp
   policyTypes:
     - Ingress
     - Egress
